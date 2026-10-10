@@ -1,0 +1,848 @@
+<!doctype html>
+<html lang="et">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tuleva / pärimise teejuht — häkatoni prototüüp</title>
+<style>
+:root{
+  --green:#16724f;
+  --green-2:#0d5e40;
+  --green-soft:#e5f1e8;
+  --mint:#f1f7f2;
+  --cream:#f6f3eb;
+  --paper:#fffefb;
+  --ink:#151714;
+  --muted:#667068;
+  --line:#dfe4dc;
+  --yellow:#f6e9b8;
+  --peach:#f5ddd4;
+  --blue:#e4eef0;
+  --radius:18px;
+  --max:1180px;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  color:var(--ink);
+  background:var(--cream);
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  line-height:1.45;
+}
+button,input{font:inherit}
+button{cursor:pointer}
+a{color:var(--green-2)}
+.wrap{max-width:var(--max);margin:auto;padding:0 24px}
+.top{
+  background:var(--paper);
+  border-bottom:1px solid var(--line);
+  position:sticky;top:0;z-index:20;
+}
+.topin{height:72px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand{display:flex;align-items:center;gap:14px;font-weight:800}
+.logo{font-size:28px;letter-spacing:-1.2px}
+.slash{color:#a3aaa4}
+.product{font-size:14px;color:var(--muted)}
+.badge{
+  border:1px solid var(--line);border-radius:999px;padding:7px 11px;
+  font-size:12px;font-weight:700;color:var(--muted);background:white
+}
+.hero{padding:82px 0 66px}
+.hero-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:58px;align-items:center}
+.kicker{font-size:13px;letter-spacing:.08em;font-weight:900;color:var(--green);text-transform:uppercase;margin-bottom:16px}
+h1,h2,h3,p{margin-top:0}
+h1{font-size:clamp(48px,7vw,82px);letter-spacing:-.055em;line-height:.94;margin-bottom:26px;max-width:760px}
+h2{font-size:clamp(34px,4.5vw,54px);letter-spacing:-.04em;line-height:1.02;margin-bottom:14px}
+h3{font-size:22px;letter-spacing:-.02em}
+.lead{font-size:22px;max-width:680px;color:#30352f}
+.hero-actions{display:flex;flex-wrap:wrap;gap:12px;margin:32px 0 24px}
+.btn{
+  border:0;border-radius:12px;min-height:48px;padding:13px 20px;font-weight:800;
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+}
+.btn-primary{background:var(--green);color:white}
+.btn-primary:hover{background:var(--green-2)}
+.btn-secondary{background:white;border:1px solid var(--line);color:var(--ink)}
+.micro{font-size:13px;color:var(--muted)}
+.hero-card{
+  background:var(--green);color:white;border-radius:26px;padding:34px;
+  min-height:390px;display:flex;flex-direction:column;justify-content:space-between;
+}
+.hero-card .big{font-size:66px;font-weight:900;letter-spacing:-.06em;line-height:.9}
+.hero-card p{color:#e5f4eb}
+.mini-map{display:grid;gap:10px;margin-top:24px}
+.mini-row{display:grid;grid-template-columns:34px 1fr;gap:12px;align-items:start}
+.mini-num{
+  width:34px;height:34px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.14);font-weight:900
+}
+.three{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:34px}
+.value{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:20px}
+.value b{display:block;font-size:15px;margin-bottom:5px}
+.value span{font-size:14px;color:var(--muted)}
+
+.app-section{display:none;padding:30px 0 70px}
+.app-section.active{display:block}
+.app-shell{
+  background:var(--paper);border:1px solid var(--line);border-radius:24px;overflow:hidden;
+  min-height:650px;
+}
+.app-grid{display:grid;grid-template-columns:minmax(0,1fr) 330px;min-height:650px}
+.mainpane{padding:34px 48px 46px;border-right:1px solid var(--line)}
+.sidepane{background:#faf9f4;padding:34px 26px}
+.stagebar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:32px}
+.stage{height:5px;border-radius:99px;background:#e7e8e3}
+.stage.on{background:var(--green)}
+.qtop{display:flex;justify-content:space-between;align-items:center;gap:14px;margin-bottom:20px}
+.back{border:0;background:transparent;color:var(--green);font-weight:800;padding:8px 0}
+.stage-label{font-size:13px;color:var(--muted);font-weight:700}
+.question{max-width:720px}
+.question h2{font-size:clamp(34px,4vw,48px)}
+.helper{font-size:16px;color:var(--muted);max-width:700px;margin:0 0 24px}
+.answers{display:grid;gap:10px;max-width:760px}
+.answer{
+  width:100%;text-align:left;background:white;border:1px solid var(--line);
+  border-radius:14px;padding:16px 18px;display:flex;gap:14px;align-items:flex-start;
+  color:var(--ink)
+}
+.answer:hover{border-color:#9fc3ad}
+.answer.selected{border-color:var(--green);background:var(--green-soft)}
+.answer .circle{width:20px;height:20px;border:2px solid #a9b1aa;border-radius:50%;margin-top:1px;flex:0 0 auto;display:grid;place-items:center}
+.answer.selected .circle{border-color:var(--green)}
+.answer.selected .circle:after{content:"";width:10px;height:10px;border-radius:50%;background:var(--green)}
+.answer strong{display:block;font-size:16px}
+.answer small{display:block;color:var(--muted);margin-top:4px;line-height:1.4}
+.multi .circle{border-radius:5px}
+.multi.selected .circle:after{content:"✓";background:transparent;color:var(--green);font-size:14px;font-weight:900;width:auto;height:auto}
+.actions{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-top:26px}
+.next{min-width:150px}
+.next:disabled{opacity:.35;cursor:not-allowed}
+.skip{border:0;background:transparent;color:var(--muted);font-weight:700}
+.summary-title{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900;margin-bottom:14px}
+.summary{display:grid;gap:9px}
+.summary-item{display:flex;gap:10px;align-items:center;background:white;border:1px solid var(--line);border-radius:13px;padding:10px 12px}
+.icon{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--green-soft);font-size:19px;flex:0 0 auto}
+.summary-item b{display:block;font-size:14px}
+.summary-item span{display:block;font-size:12px;color:var(--muted)}
+.tip{margin-top:18px;background:var(--blue);border-radius:13px;padding:14px;font-size:13px;color:#405052}
+.formbox{max-width:760px;background:#fafbf8;border:1px solid var(--line);border-radius:16px;padding:18px}
+.branch-row{display:grid;grid-template-columns:1fr 180px;gap:16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.branch-row:last-child{border-bottom:0}
+select{
+  width:100%;min-height:44px;border:1px solid #bec7bf;border-radius:10px;background:white;padding:0 12px;font-size:16px
+}
+
+.result-section{display:none;padding:30px 0 70px}
+.result-section.active{display:block}
+.result-shell{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:42px}
+.result-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start}
+.confidence{border-radius:999px;padding:8px 12px;font-size:13px;font-weight:900;white-space:nowrap}
+.conf-high{background:var(--green-soft);color:var(--green-2)}
+.conf-mid{background:var(--yellow);color:#5f531e}
+.conf-low{background:var(--peach);color:#773e34}
+.result-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr);gap:28px;margin-top:28px}
+.card{border:1px solid var(--line);border-radius:18px;padding:22px;background:white}
+.card + .card{margin-top:14px}
+.card-title{font-weight:900;margin-bottom:14px}
+.share-list{display:grid;gap:13px}
+.share-row{display:grid;grid-template-columns:minmax(150px,1fr) minmax(130px,2fr) 70px;gap:12px;align-items:center}
+.bar{height:12px;border-radius:99px;background:#edf0eb;overflow:hidden}
+.fill{height:100%;background:var(--green);border-radius:99px}
+.share-pct{text-align:right;font-weight:900}
+.two-step{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.stepbox{background:var(--mint);border-radius:14px;padding:16px}
+.stepbox .n{font-size:12px;font-weight:900;color:var(--green);margin-bottom:8px}
+.stepbox b{display:block;margin-bottom:5px}
+.stepbox span{font-size:13px;color:var(--muted)}
+.risks{display:grid;gap:11px}
+.risk{border-radius:15px;padding:16px;display:grid;grid-template-columns:36px 1fr;gap:11px}
+.risk.warn{background:var(--yellow)}
+.risk.red{background:var(--peach)}
+.risk.info{background:var(--blue)}
+.risk.good{background:var(--green-soft)}
+.risk .ri{font-size:24px}
+.risk b{display:block;margin-bottom:4px}
+.risk p{font-size:13px;color:#4c514d;margin:0}
+.wish{background:var(--green);color:white;border-radius:20px;padding:25px;margin-top:18px}
+.wish h3{font-size:27px;margin-bottom:10px}
+.wish p{color:#e6f3eb}
+.wish-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:14px}
+.wish .btn-secondary{background:white}
+.wish-response{display:none;background:white;color:var(--ink);border-radius:13px;padding:15px;margin-top:14px}
+.sources{margin-top:22px;border-top:1px solid var(--line);padding-top:18px}
+details{border:1px solid var(--line);border-radius:12px;background:white;padding:13px 15px}
+summary{cursor:pointer;font-weight:800}
+.sources ul{margin-bottom:0}
+.sources li{margin:8px 0;font-size:13px;color:var(--muted)}
+.footer-note{text-align:center;color:var(--muted);font-size:12px;padding:18px}
+.hidden{display:none!important}
+@media(max-width:880px){
+  .hero-grid,.app-grid,.result-grid{grid-template-columns:1fr}
+  .hero{padding-top:54px}
+  .hero-card{min-height:310px}
+  .three{grid-template-columns:1fr}
+  .mainpane{border-right:0;padding:28px 24px}
+  .sidepane{border-top:1px solid var(--line)}
+  .result-shell{padding:28px 24px}
+}
+@media(max-width:600px){
+  .wrap{padding:0 14px}.topin{height:62px}.product{display:none}.badge{font-size:11px}
+  h1{font-size:51px}.lead{font-size:19px}.hero{padding:46px 0}
+  .hero-card{padding:24px}.hero-card .big{font-size:54px}
+  .mainpane{padding:24px 18px}.sidepane{padding:22px 18px}
+  .question h2{font-size:36px}.result-shell{padding:24px 18px}
+  .result-head{display:block}.confidence{display:inline-block;margin-top:8px}
+  .two-step{grid-template-columns:1fr}
+  .share-row{grid-template-columns:1fr 55px}.share-row .bar{grid-column:1/3;grid-row:2}
+  .branch-row{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap topin">
+    <div class="brand"><span class="logo">Tuleva</span><span class="slash">/</span><span class="product">pärimise teejuht</span></div>
+    <div class="badge">Häkatoni prototüüp</div>
+  </div>
+</header>
+
+<main>
+<section id="landing">
+  <div class="wrap hero">
+    <div class="hero-grid">
+      <div>
+        <div class="kicker">Olulised asjad oleksid läbi mõeldud</div>
+        <h1>Mis saab sinu varast?</h1>
+        <p class="lead">Vaata, kes päriks seaduse järgi. Mõista, mida see sinu lähedastele päriselt tähendab. Ja kontrolli, kas tulemus vastab sinu soovile.</p>
+        <div class="hero-actions">
+          <button id="start" class="btn btn-primary">Loo oma ülevaade →</button>
+          <button id="example" class="btn btn-secondary">Ava näide</button>
+        </div>
+        <div class="micro">Kontot pole vaja. Ära sisesta isikukoode ega muid tundlikke isikuandmeid.</div>
+        <div class="three">
+          <div class="value"><b>01 · Kes pärib?</b><span>Alustame sinu perest ja seadusjärgsetest pärijatest.</span></div>
+          <div class="value"><b>02 · Mis pärandisse läheb?</b><span>Varasuhe, kodu, pensionivara ja kohustused võivad pilti muuta.</span></div>
+          <div class="value"><b>03 · Kas see sobib sulle?</b><span>Testament on vahend, mitte eesmärk. Mõnikord pole vaja midagi muuta.</span></div>
+        </div>
+      </div>
+      <aside class="hero-card">
+        <div>
+          <div class="kicker" style="color:#cce7d6">Tulemus enne juriidilist žargooni</div>
+          <div class="big">2–5<br>min</div>
+          <p>Lihtne juhtum jõuab kiiresti tulemuseni. Lisaküsimused ilmuvad ainult siis, kui neid on päriselt vaja.</p>
+        </div>
+        <div class="mini-map">
+          <div class="mini-row"><div class="mini-num">1</div><div><b>Perekond</b><div class="micro" style="color:#d7eee0">Abikaasa, registreeritud elukaaslane, lapsed ja sugulusliinid.</div></div></div>
+          <div class="mini-row"><div class="mini-num">2</div><div><b>Vara ja kohustused</b><div class="micro" style="color:#d7eee0">Mis on sinu pärandvara, mitte kogu leibkonna vara.</div></div></div>
+          <div class="mini-row"><div class="mini-num">3</div><div><b>Soovitud tulemus</b><div class="micro" style="color:#d7eee0">Kas seadusjärgne tulemus on see, mida tahad?</div></div></div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<section id="app" class="app-section">
+  <div class="wrap">
+    <div class="app-shell">
+      <div class="app-grid">
+        <div class="mainpane">
+          <div class="stagebar"><div id="stage1" class="stage on"></div><div id="stage2" class="stage"></div><div id="stage3" class="stage"></div></div>
+          <div class="qtop">
+            <button id="back" class="back">← Tagasi</button>
+            <div id="stageLabel" class="stage-label">1 · Perekond</div>
+          </div>
+          <div class="question">
+            <div id="qKicker" class="kicker">Sinu olukord</div>
+            <h2 id="qTitle"></h2>
+            <p id="qHelper" class="helper"></p>
+          </div>
+          <div id="answers" class="answers"></div>
+          <div id="custom"></div>
+          <div class="actions">
+            <button id="skip" class="skip hidden">Jäta praegu vahele</button>
+            <button id="next" class="btn btn-primary next" disabled>Järgmine →</button>
+          </div>
+        </div>
+        <aside class="sidepane">
+          <div class="summary-title">Sinu olukord</div>
+          <div id="summary" class="summary"></div>
+          <div class="tip"><b>Miks nii palju harusid?</b><br>Õiguslikult on eri küsimustel eri roll: osa määrab, <em>kes</em> pärib, osa seda, <em>mis</em> üldse pärandvara hulka kuulub, ja osa ainult praktilisi riske.</div>
+        </aside>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="result" class="result-section">
+  <div class="wrap">
+    <div class="result-shell">
+      <button id="restart" class="back">← Alusta uuesti</button>
+      <div class="result-head">
+        <div>
+          <div class="kicker">Sinu esialgne ülevaade</div>
+          <h2 id="resultTitle">Kui sa sureksid täna…</h2>
+          <p id="resultIntro" class="helper"></p>
+        </div>
+        <div id="confidence" class="confidence conf-mid">Osaline kindlus</div>
+      </div>
+
+      <div class="result-grid">
+        <div>
+          <div class="card">
+            <div class="card-title">Kuidas seadusjärgne pärand jaotuks?</div>
+            <div id="shares" class="share-list"></div>
+          </div>
+          <div class="card">
+            <div class="card-title">Oluline: enne protsente tuleb teada, mis on pärandvara</div>
+            <div class="two-step">
+              <div class="stepbox"><div class="n">SAMM 1</div><b>Eralda sinu vara / osa</b><span id="estateText">Varasuhe ja omand võivad tähendada, et kogu pere vara ei kuulu pärandvara hulka.</span></div>
+              <div class="stepbox"><div class="n">SAMM 2</div><b>Jaga ainult pärandvara</b><span>Alles seejärel rakenduvad pärijate protsendid.</span></div>
+            </div>
+          </div>
+          <div class="wish">
+            <h3>Kas see on see, mida sa tahaksid, et juhtuks?</h3>
+            <p>Kui jah, ei pruugi testamenti üldse vaja olla. Kui ei, on nüüd selge, mida tasub muuta.</p>
+            <div class="wish-actions">
+              <button class="btn btn-secondary wishBtn" data-wish="yes">Jah</button>
+              <button class="btn btn-secondary wishBtn" data-wish="no">Ei, tahaksin teisiti</button>
+              <button class="btn btn-secondary wishBtn" data-wish="unsure">Ma ei tea</button>
+            </div>
+            <div id="wishResponse" class="wish-response"></div>
+          </div>
+        </div>
+        <div>
+          <div class="card-title">Mida tasub kontrollida</div>
+          <div id="risks" class="risks"></div>
+        </div>
+      </div>
+
+      <div class="sources">
+        <details>
+          <summary>Allikad ja prototüübi piirangud</summary>
+          <ul>
+            <li>Seadusjärgsete pärijate järjekorrad ja abikaasa / registreeritud elukaaslase osa: <a href="https://www.riigiteataja.ee/akt/114032025019" target="_blank" rel="noopener">Pärimisseadus §§ 10–16</a>.</li>
+            <li>Abikaasade varasuhted: <a href="https://www.riigiteataja.ee/akt/110032016003?leiaKehtiv=" target="_blank" rel="noopener">Perekonnaseadus</a>; registreeritud elukaaslaste varasuhe: <a href="https://www.riigiteataja.ee/akt/106072023047" target="_blank" rel="noopener">Kooseluseadus § 16</a>.</li>
+            <li>Alaealise või muu piiratud teovõimega pärija korral on inventuur kohustuslik: <a href="https://www.riigiteataja.ee/akt/114032025019" target="_blank" rel="noopener">Pärimisseadus § 136</a>.</li>
+            <li>II ja III samba pensionifondi osakud on päritavad; praktiline menetlus sõltub sambast ja pärijast: <a href="https://www.pensionikeskus.ee/minu-pension/parimine/tpid/141/" target="_blank" rel="noopener">Pensionikeskus — II sammas</a> ja <a href="https://www.pensionikeskus.ee/iii-sammas/parimine/" target="_blank" rel="noopener">III sammas</a>.</li>
+            <li>Prototüüp ei käsitle lõpuni kõiki erijuhte: sügavamad põlvkonnad, poolõdede/-vendade täpne jaotus, pärimiskõlbmatus, loobumine, välisriigi õigus, sündimata laps, vaidlustatud omand jms.</li>
+          </ul>
+        </details>
+      </div>
+    </div>
+    <div class="footer-note">Häkatoni prototüüp · mitte õigusnõuanne ega pärimistunnistus · enne avalikku kasutust vajab reeglimootor notari või pärimisõiguse spetsialisti valideerimist.</div>
+  </div>
+</section>
+</main>
+
+<script>
+(() => {
+  const S = {};
+  const history = [];
+  let current = null;
+  let selection = null;
+
+  const app = document.getElementById('app');
+  const landing = document.getElementById('landing');
+  const result = document.getElementById('result');
+  const qTitle = document.getElementById('qTitle');
+  const qHelper = document.getElementById('qHelper');
+  const qKicker = document.getElementById('qKicker');
+  const answers = document.getElementById('answers');
+  const custom = document.getElementById('custom');
+  const next = document.getElementById('next');
+  const back = document.getElementById('back');
+  const skip = document.getElementById('skip');
+
+  const Q = {
+    will:{
+      stage:1,kicker:'Alustame lähtekohast',
+      title:'Kas sul on testament või pärimisleping?',
+      helper:'Kui jah, võib tegelik tulemus seadusjärgsest jaotusest erineda. Saame siiski näidata, mis juhtuks ilma selle korralduseta.',
+      options:[
+        ['none','Ei ole'],
+        ['will','Mul on testament'],
+        ['contract','Mul on pärimisleping'],
+        ['unknown','Ma ei tea / pole kindel']
+      ],
+      next:()=> 'relationship'
+    },
+    relationship:{
+      stage:1,kicker:'Paarisuhe',
+      title:'Milline on sinu suhte õiguslik staatus?',
+      helper:'Abikaasa ja registreeritud elukaaslane on seadusjärgsed pärijad. Registreerimata elukaaslane ei päri ainult kooselu tõttu.',
+      options:[
+        ['married','Olen abielus'],
+        ['registered','Mul on registreeritud elukaaslane'],
+        ['unregistered','Mul on elukaaslane, kuid me ei ole abielus ega registreeritud'],
+        ['none','Mul ei ole partnerit']
+      ],
+      next:()=> ['married','registered'].includes(S.relationship) ? 'regime' : 'previousUnion'
+    },
+    regime:{
+      stage:1,kicker:'Varasuhe',
+      title:'Milline varasuhe teil kehtib?',
+      helper:'Seda tuleb küsida nii abikaasalt kui registreeritud elukaaslaselt. Varasuhe aitab aru saada, milline vara või nõue võib enne pärimist sinu pärandvara hulka kuuluda.',
+      options:[
+        ['community','Varaühisus','Ühisvara ja lahusvara tuleb enne pärandiosade arvutamist eristada.'],
+        ['separate','Varalahusus','Omand tuleb vaadata vara kaupa.'],
+        ['accrual','Vara juurdekasvu tasaarvestus','Surma korral võib enne lõplikku pärandvara tekkida tasaarvestusnõue.'],
+        ['unknown','Ei tea','Päris tootes aitaksime kontrollida varasuhteregistrit.']
+      ],
+      next:()=> 'previousUnion'
+    },
+    previousUnion:{
+      stage:1,kicker:'Varasemad suhted',
+      title:'Kas oled varem olnud abielus või registreeritud kooselus?',
+      helper:'Endine abikaasa või partner ei ole seetõttu automaatselt pärija, kuid jagamata varasem ühisvara võib mõjutada seda, mis sulle tegelikult kuulub.',
+      options:[['no','Ei'],['yes','Jah']],
+      next:()=> S.previousUnion==='yes' ? 'previousProperty' : 'livingChildren'
+    },
+    previousProperty:{
+      stage:1,kicker:'Varasem vara',
+      title:'Kas varasema suhte ühisvara on täielikult jagatud?',
+      helper:'Kui ei või sa pole kindel, ei pruugi pärandvara koosseisu olla võimalik usaldusväärselt hinnata ilma dokumente kontrollimata.',
+      options:[['yes','Jah'],['no','Ei'],['unknown','Ei tea']],
+      next:()=> 'livingChildren'
+    },
+    livingChildren:{
+      stage:1,kicker:'Lapsed',
+      title:'Kas sul on elus lapsi?',
+      helper:'Arvesta bioloogilisi ja lapsendatud lapsi. Kasulaps ei ole automaatselt sinu alaneja sugulane.',
+      options:[['yes','Jah'],['no','Ei']],
+      next:()=> S.livingChildren==='yes' ? 'livingCount' : 'deceasedChildren'
+    },
+    livingCount:{
+      stage:1,kicker:'Lapsed',
+      title:'Mitu elus last sul on?',
+      helper:'Lapsed pärivad seaduse järgi võrdsetes osades; abikaasa või registreeritud elukaaslane pärib nende kõrval vähemalt 1/4 pärandist.',
+      options:[['1','1'],['2','2'],['3','3'],['4','4'],['5','5 või rohkem']],
+      next:()=> 'deceasedChildren'
+    },
+    deceasedChildren:{
+      stage:1,kicker:'Laste harud',
+      title:'Kas sul on surnud lapsi, kellel on elus järglasi?',
+      helper:'Surnud lapse asemele võivad astuda tema alanejad. Pärimine toimub sellisel juhul lapse haru kaudu.',
+      options:[['no','Ei'],['yes','Jah']],
+      next:()=> S.deceasedChildren==='yes' ? 'deceasedBranchCount' : 'minors'
+    },
+    deceasedBranchCount:{
+      stage:1,kicker:'Laste harud',
+      title:'Mitu sellist surnud lapse haru on?',
+      helper:'Iga surnud lapse haru saab kõigepealt selle osa, mille oleks saanud surnud laps.',
+      options:[['1','1'],['2','2'],['3','3'],['4','4 või rohkem']],
+      next:()=> 'branchDescendants'
+    },
+    deeperDesc:{
+      stage:1,kicker:'Laste harud',
+      title:'Kas mõnes neist harudest on veel surnud järglane, kellel on omakorda järglasi?',
+      helper:'Kui jah, muutub haru mitmetasandiliseks. Prototüüp näitab siis lapse haru osa, kuid ei teeskle täpset jaotust haru sees.',
+      options:[['no','Ei'],['yes','Jah'],['unknown','Ei tea']],
+      next:()=> 'minors'
+    },
+    minors:{
+      stage:1,kicker:'Pärijate vanus',
+      title:'Kas mõni võimalik alanejast pärija on alla 18-aastane?',
+      helper:'Alaealisus ei vähenda pärandiosa, kuid mõjutab pärandvara haldamist. Piiratud teovõimega pärija korral on pärandi inventuur kohustuslik.',
+      options:[['no','Ei'],['yes','Jah']],
+      next:()=> 'previousRelationshipChildren'
+    },
+    previousRelationshipChildren:{
+      stage:1,kicker:'Kärgpere',
+      title:'Kas mõni sinu laps on teisest suhtest kui praegune partner?',
+      helper:'See ei muuda lapse seadusjärgset osa, kuid võib muuta pere jaoks oluliseks küsimuse, kes saab kodu või muu konkreetse vara.',
+      options:[['no','Ei'],['yes','Jah'],['na','Mul ei ole praegust partnerit']],
+      next:()=> hasFirstOrder() ? 'assets' : 'parents'
+    },
+    parents:{
+      stage:1,kicker:'Teine pärijate järjekord',
+      title:'Kas sinu vanemad on elus?',
+      helper:'Seda küsime ainult siis, kui sul ei ole lapsi ega surnud lapse kaudu pärivaid järglasi.',
+      options:[['both','Mõlemad'],['mother','Ainult ema'],['father','Ainult isa'],['none','Kumbki ei ole']],
+      next:()=>{
+        if(S.parents==='both') return 'assets';
+        if(S.parents==='mother' || S.parents==='father') return 'deadParentDesc';
+        return 'bothParentsDesc';
+      }
+    },
+    deadParentDesc:{
+      stage:1,kicker:'Teine pärijate järjekord',
+      title:'Kas surnud vanemal on peale sinu teisi alanejaid?',
+      helper:'Näiteks sinu õed-vennad või nende järglased. Kui jah, võivad nad astuda surnud vanema asemele.',
+      options:[['no','Ei'],['yes','Jah'],['unknown','Ei tea']],
+      next:()=> 'assets'
+    },
+    bothParentsDesc:{
+      stage:1,kicker:'Teine pärijate järjekord',
+      title:'Kas sinu vanematel on peale sinu teisi alanejaid?',
+      helper:'See hõlmab sinu õdesid-vendi ja surnud õe-venna järglasi. Poolõdede/-vendade täpne osa sõltub sellest, kumma vanema kaudu sugulus jookseb.',
+      options:[['no','Ei'],['yes','Jah'],['unknown','Ei tea']],
+      next:()=> {
+        if(S.bothParentsDesc==='no' && !legalPartner()) return 'thirdOrder';
+        return 'assets';
+      }
+    },
+    thirdOrder:{
+      stage:1,kicker:'Kolmas pärijate järjekord',
+      title:'Kas sul on elus vanavanemaid või nende alanejaid?',
+      helper:'Kui puuduvad esimese ja teise järjekorra pärijad ning sul pole abikaasat ega registreeritud elukaaslast, tuleb vaadata vanavanemaid ja nende järglasi.',
+      options:[['yes','Jah'],['no','Ei'],['unknown','Ei tea']],
+      next:()=> 'assets'
+    },
+    assets:{
+      stage:2,kicker:'Vara',
+      title:'Millist vara sul on?',
+      helper:'Vali kõik, mis on asjakohane. Täpseid eurosummasid ei ole selle prototüübi jaoks vaja.',
+      multi:true,
+      options:[
+        ['home','Kodu / korter'],
+        ['realestate','Muu kinnisvara või maa'],
+        ['investments','Raha, säästud või investeeringud'],
+        ['pillar2','II samba pensionivara'],
+        ['pillar3','III samba pensionivara'],
+        ['business','Ettevõte või osalus'],
+        ['valuable','Sõiduk või muu väärtuslik vallasvara'],
+        ['foreign','Vara väljaspool Eestit']
+      ],
+      next:()=> (hasLegalRegime() && (S.assets||[]).some(x=>x==='home'||x==='realestate')) ? 'realEstateOrigin' : 'debts'
+    },
+    realEstateOrigin:{
+      stage:2,kicker:'Kinnisvara',
+      title:'Kuidas sinu peamine kinnisvara omandati?',
+      helper:'See on lihtsustatud küsimus. Päris tootes tuleb iga kinnisasi eraldi üle vaadata.',
+      options:[
+        ['during','Praeguse abielu / registreeritud kooselu ajal tasu eest'],
+        ['before','Enne praegust abielu / kooselulepingut'],
+        ['giftinherit','Sain selle kingituse või pärimise teel'],
+        ['separate','See kuulub dokumentide järgi ainult mulle eraldi varana'],
+        ['unknown','Ei tea / olukord on keerulisem']
+      ],
+      next:()=> 'debts'
+    },
+    debts:{
+      stage:2,kicker:'Kohustused',
+      title:'Kas sul on olulisi kohustusi?',
+      helper:'Vali kõik, mis võivad pärandvara väärtust mõjutada.',
+      multi:true,
+      allowNone:true,
+      options:[
+        ['mortgage','Kodulaen / hüpoteek'],
+        ['loan','Muu laen'],
+        ['lease','Liising'],
+        ['private','Eraisiku laen'],
+        ['guarantee','Käendus kellegi teise kohustusele'],
+        ['businessdebt','Ettevõtlusega seotud isiklik kohustus'],
+        ['none','Olulisi kohustusi ei ole'],
+        ['unknown','Ma ei tea']
+      ],
+      next:()=> 'RESULT'
+    }
+  };
+
+  function legalPartner(){ return ['married','registered'].includes(S.relationship); }
+  function hasLegalRegime(){ return legalPartner(); }
+  function liveCount(){ return S.livingChildren==='yes' ? Number(S.livingCount||0) : 0; }
+  function deadBranchCount(){ return S.deceasedChildren==='yes' ? Number(S.deceasedBranchCount||0) : 0; }
+  function hasFirstOrder(){ return liveCount()+deadBranchCount()>0; }
+
+  function stageName(n){ return n===1?'1 · Perekond':n===2?'2 · Vara ja kohustused':'3 · Tulemus'; }
+  function setStage(n){
+    document.getElementById('stageLabel').textContent=stageName(n);
+    [1,2,3].forEach(i=>document.getElementById('stage'+i).classList.toggle('on',i<=n));
+  }
+
+  function showApp(){
+    landing.style.display='none';result.classList.remove('active');app.classList.add('active');window.scrollTo(0,0);
+  }
+  function showLanding(){
+    app.classList.remove('active');result.classList.remove('active');landing.style.display='block';window.scrollTo(0,0);
+  }
+
+  function optionButton(v,label,small,multi){
+    const b=document.createElement('button'); b.type='button';
+    b.className='answer'+(multi?' multi':'');
+    b.dataset.value=v;
+    b.innerHTML=`<span class="circle"></span><span><strong>${label}</strong>${small?`<small>${small}</small>`:''}</span>`;
+    return b;
+  }
+
+  function render(id){
+    current=id; selection=null; answers.innerHTML=''; custom.innerHTML=''; skip.classList.add('hidden');
+    const q=Q[id]; setStage(q.stage); qKicker.textContent=q.kicker; qTitle.textContent=q.title; qHelper.textContent=q.helper;
+    back.style.visibility=history.length?'visible':'hidden';
+
+    if(id==='branchDescendants'){ renderBranchForm(); return; }
+
+    if(q.multi){
+      selection=new Set(S[id]||[]);
+      q.options.forEach(o=>{
+        const b=optionButton(o[0],o[1],o[2],true);
+        if(selection.has(o[0])) b.classList.add('selected');
+        b.addEventListener('click',()=>{
+          const v=o[0];
+          if(id==='debts' && v==='none'){
+            selection.clear(); selection.add('none');
+            [...answers.children].forEach(x=>x.classList.remove('selected')); b.classList.add('selected');
+          }else{
+            if(id==='debts') selection.delete('none');
+            if(selection.has(v)) selection.delete(v); else selection.add(v);
+            [...answers.children].forEach(x=>{
+              x.classList.toggle('selected',selection.has(x.dataset.value));
+            });
+          }
+          next.disabled=selection.size===0;
+        });
+        answers.appendChild(b);
+      });
+      next.disabled=selection.size===0;
+    }else{
+      selection=S[id]||null;
+      q.options.forEach(o=>{
+        const b=optionButton(o[0],o[1],o[2],false);
+        if(selection===o[0]) b.classList.add('selected');
+        b.addEventListener('click',()=>{
+          selection=o[0]; [...answers.children].forEach(x=>x.classList.remove('selected'));b.classList.add('selected');next.disabled=false;
+        });
+        answers.appendChild(b);
+      });
+      next.disabled=!selection;
+    }
+    renderSummary();
+  }
+
+  function renderBranchForm(){
+    setStage(1); back.style.visibility=history.length?'visible':'hidden';
+    qKicker.textContent='Laste harud';
+    qTitle.textContent='Mitu elus järglast on igas surnud lapse harus?';
+    qHelper.textContent='Kui surnud lapsel on näiteks kaks elus last, jagavad nad selle haru osa omavahel võrdselt. Kui haru on keerukam kui üks põlvkond, märgi see järgmises küsimuses.';
+    const n=Math.min(deadBranchCount(),4);
+    const existing=S.branchDescendants||[];
+    const box=document.createElement('div');box.className='formbox';
+    for(let i=0;i<n;i++){
+      const row=document.createElement('div');row.className='branch-row';
+      row.innerHTML=`<div><b>Surnud lapse haru ${i+1}</b><div class="micro">Mitu elus last / otsest järglast selles harus praegu arvestame?</div></div>`;
+      const sel=document.createElement('select');sel.dataset.i=i;
+      sel.innerHTML='<option value="">Vali</option>'+[1,2,3,4,5].map(x=>`<option value="${x}" ${Number(existing[i])===x?'selected':''}>${x}${x===5?' või rohkem':''}</option>`).join('');
+      sel.addEventListener('change',validateBranchForm);row.appendChild(sel);box.appendChild(row);
+    }
+    custom.appendChild(box);next.disabled=true;validateBranchForm();renderSummary();
+  }
+
+  function validateBranchForm(){
+    const sels=[...custom.querySelectorAll('select')];
+    next.disabled=!(sels.length && sels.every(s=>s.value));
+  }
+
+  function commitCurrent(){
+    if(current==='branchDescendants'){
+      S.branchDescendants=[...custom.querySelectorAll('select')].map(x=>Number(x.value));
+      return;
+    }
+    const q=Q[current];
+    S[current]=q.multi?[...selection]:selection;
+  }
+
+  function nextId(){
+    if(current==='branchDescendants') return 'deeperDesc';
+    return typeof Q[current].next==='function'?Q[current].next():Q[current].next;
+  }
+
+  function goNext(){
+    if(next.disabled)return;
+    commitCurrent();
+    history.push(current);
+    const n=nextId();
+    if(n==='RESULT'){ showResult(); return; }
+    render(n);
+  }
+
+  function goBack(){
+    if(!history.length)return;
+    const prev=history.pop();
+    render(prev);
+  }
+
+  function renderSummary(){
+    const rows=[['👤','Sina','Pärandaja']];
+    if(S.relationship){
+      const map={
+        married:['💍','Abikaasa','Seadusjärgne pärija'],
+        registered:['🤝','Registreeritud elukaaslane','Seadusjärgne pärija'],
+        unregistered:['♥','Elukaaslane','Ei ole ainult kooselu tõttu seadusjärgne pärija'],
+        none:['—','Partnerit ei ole','']
+      };
+      rows.push(map[S.relationship]);
+    }
+    if(S.regime){
+      const m={community:'Varaühisus',separate:'Varalahusus',accrual:'Juurdekasvu tasaarvestus',unknown:'Varasuhe teadmata'};
+      rows.push(['◐',m[S.regime],'Mõjutab pärandvara koosseisu']);
+    }
+    const branches=liveCount()+deadBranchCount();
+    if(branches){
+      rows.push(['👶',`${liveCount()} elus last${deadBranchCount()?` + ${deadBranchCount()} surnud lapse haru`:''}`,'Esimese järjekorra pärijad']);
+    } else if(S.livingChildren==='no' && S.deceasedChildren==='no'){
+      rows.push(['↳','Lapsi / nende kaudu pärivaid järglasi ei ole','Vaatame järgmisi pärijate järjekordi']);
+    }
+    if(S.assets?.length) rows.push(['⌂',`${S.assets.length} varaliiki valitud`,'Vara koosseis']);
+    document.getElementById('summary').innerHTML=rows.map(r=>`<div class="summary-item"><div class="icon">${r[0]}</div><div><b>${r[1]}</b><span>${r[2]||''}</span></div></div>`).join('');
+  }
+
+  function sharesCalculation(){
+    const heirs=[]; const partner=legalPartner();
+    const branches=liveCount()+deadBranchCount();
+    let exact=true, note='';
+
+    if(branches>0){
+      const pshare=partner?Math.max(1/(branches+1),.25):0;
+      const branchShare=(1-pshare)/branches;
+      if(partner) heirs.push({name:S.relationship==='married'?'Abikaasa':'Registreeritud elukaaslane',share:pshare});
+      for(let i=1;i<=liveCount();i++) heirs.push({name:`Laps ${i}`,share:branchShare});
+      const desc=S.branchDescendants||[];
+      for(let i=0;i<deadBranchCount();i++){
+        const cnt=Number(desc[i]||1);
+        if(S.deeperDesc==='yes'||S.deeperDesc==='unknown'||cnt>=5){
+          heirs.push({name:`Surnud lapse haru ${i+1}`,share:branchShare});
+          exact=false;
+          note='Surnud lapse haru sees vajab jaotus täpsemat sugupuud.';
+        }else{
+          for(let j=1;j<=cnt;j++) heirs.push({name:`Haru ${i+1} järglane ${j}`,share:branchShare/cnt});
+        }
+      }
+      if(S.livingCount==='5'||S.deceasedBranchCount==='4') {exact=false;note='Valik „või rohkem“ tähendab, et täpne protsent vajab täpset arvu.'}
+      return {heirs,exact,note};
+    }
+
+    // No descendants: spouse/registered partner gets 1/2 with second order, 100% if no second order.
+    const both=S.parents==='both';
+    const one=['mother','father'].includes(S.parents);
+    let secondExists=false;
+    if(both) secondExists=true;
+    if(one) secondExists=S.deadParentDesc!=='no' || true; // surviving parent itself is second-order
+    if(S.parents==='none') secondExists=S.bothParentsDesc!=='no';
+
+    if(partner){
+      if(secondExists){
+        heirs.push({name:S.relationship==='married'?'Abikaasa':'Registreeritud elukaaslane',share:.5});
+        if(both){
+          heirs.push({name:'Ema',share:.25},{name:'Isa',share:.25});
+        }else if(one && S.deadParentDesc==='no'){
+          heirs.push({name:S.parents==='mother'?'Ema':'Isa',share:.5});
+        }else{
+          heirs.push({name:'Teise järjekorra pärijad',share:.5});
+          exact=false;note='Teise järjekorra 50% vajab sugulusliinide täpsemat jaotust.';
+        }
+      }else{
+        heirs.push({name:S.relationship==='married'?'Abikaasa':'Registreeritud elukaaslane',share:1});
+      }
+      return {heirs,exact,note};
+    }
+
+    if(both){
+      heirs.push({name:'Ema',share:.5},{name:'Isa',share:.5});
+      return {heirs,exact:true,note:''};
+    }
+    if(one && S.deadParentDesc==='no'){
+      heirs.push({name:S.parents==='mother'?'Ema':'Isa',share:1});
+      return {heirs,exact:true,note:''};
+    }
+    if(one && S.deadParentDesc!=='no'){
+      heirs.push({name:S.parents==='mother'?'Ema':'Isa',share:.5},{name:'Surnud vanema alanejate haru',share:.5});
+      return {heirs,exact:false,note:'Surnud vanema haru sees vajab jaotus õdede-vendade ja nende järglaste täpsemat sugupuud.'};
+    }
+    if(S.parents==='none' && S.bothParentsDesc!=='no'){
+      heirs.push({name:'Teise järjekorra pärijad',share:1});
+      return {heirs,exact:false,note:'Täpsed osad sõltuvad ema- ja isapoolsest sugulusliinist; poolõed/-vennad võivad pärida ainult vastava vanema liini kaudu.'};
+    }
+    if(S.thirdOrder==='yes'||S.thirdOrder==='unknown'){
+      heirs.push({name:'Kolmanda järjekorra pärijad',share:1});
+      return {heirs,exact:false,note:'Täpsed osad sõltuvad vanavanemate neljast harust ja nende alanejatest.'};
+    }
+    heirs.push({name:'Võimalik KOV / riik',share:1});
+    return {heirs,exact:false,note:'Kui seadusjärgseid pärijaid ei ole, võib pärijaks olla kohalik omavalitsusüksus või seaduses ette nähtud juhul riik. See vajab ametlikku kontrolli.'};
+  }
+
+  function confidence(calc){
+    let level='high', text='Kõrge kindlus';
+    if(!calc.exact || S.will!=='none' || S.regime==='unknown' || S.previousProperty==='no' || S.previousProperty==='unknown' || (S.assets||[]).includes('foreign')){level='mid';text='Osaline kindlus'}
+    if(S.deeperDesc==='yes' || S.bothParentsDesc==='unknown' || S.deadParentDesc==='unknown' || (S.assets||[]).includes('foreign') || S.regime==='accrual'){level='low';text='Vajab täpsustamist'}
+    return [level,text];
+  }
+
+  function estateExplanation(){
+    if(!legalPartner()) return 'Pärandvara hulka läheb sinu enda vara ja sinu osa kaasomandist, millest arvestatakse maha pärandvaraga seotud kohustused.';
+    if(S.regime==='community'){
+      if(S.realEstateOrigin==='during') return 'Varaühisuse korral tuleb esmalt eristada ühisvara ja lahusvara. Sinu osa ühisvaras kuulub pärandvara hulka; kogu ühine kodu ei lähe automaatselt pärandisse.';
+      return 'Varaühisuse korral ei ole kõik abielu ajal olemas olev vara automaatselt ühisvara. Kingi, pärimise, varasema omandi ja abieluvaralepingu mõju tuleb vara kaupa kontrollida.';
+    }
+    if(S.regime==='separate') return 'Varalahususe korral tuleb omand vara kaupa kindlaks teha. Pärandisse läheb see, mis kuulus sulle.';
+    if(S.regime==='accrual') return 'Vara juurdekasvu tasaarvestuse korral võib surmaga varasuhte lõppedes tekkida tasaarvestusnõue. Seetõttu ei saa pärandvara lõplikku suurust hinnata ainult omandi järgi.';
+    return 'Varasuhe tuleb esmalt kindlaks teha, sest see võib muuta pärandvara koosseisu.';
+  }
+
+  function riskList(calc){
+    const R=[];
+    if(S.will==='will'||S.will==='contract') R.push(['info','📄','Olemasolev korraldus võib tulemust muuta','Allolev jaotus on seadusjärgne võrdlus. Testament või pärimisleping võib määrata teistsuguse tulemuse; lisaks võivad teatud juhtudel tekkida sundosa nõuded.']);
+    if(S.will==='unknown') R.push(['warn','?','Testamendi staatus on ebaselge','Enne lõpliku tulemuse kasutamist tuleb kontrollida, kas kehtiv testament või pärimisleping on olemas.']);
+    if(S.relationship==='unregistered') R.push(['red','♥','Elukaaslane ei ole automaatselt pärija','Registreerimata elukaaslane ei saa seadusjärgset pärandiosa ainult kooselu tõttu.']);
+    if(S.previousProperty==='no'||S.previousProperty==='unknown') R.push(['warn','↔','Varasema suhte vara võib olla jagamata','See võib muuta seda, mis vara sulle päriselt kuulub ja seega mida saab üldse pärida.']);
+    if(S.minors==='yes') R.push(['warn','👶','Alaealine pärija tähendab lisatoiminguid','Piiratud teovõimega pärija korral on pärandi inventuur kohustuslik; mõne tehingu jaoks võib vaja olla kohtu luba.']);
+    if(S.previousRelationshipChildren==='yes') R.push(['warn','◌','Kärgpere: laste õigused on võrdsed','Varasemast suhtest lapsel ei ole väiksem seadusjärgne osa. Kodu või muu jagamatu vara puhul võib see tekitada kaasomandi.']);
+    if((S.assets||[]).includes('home') && hasFirstOrder()) R.push(['red','⌂','Kodu võib jääda mitme pärija ühisesse pärandvarasse','Pärijad saavad pärandvara alguses ühiselt; konkreetse kodu „protsendid“ ei teki automaatselt ilma pärandvara jagamiseta.']);
+    if((S.assets||[]).some(x=>x==='pillar2'||x==='pillar3')) R.push(['info','P','Pensionivara on päritav','II ja III samba fondiosakute pärimisel tuleb pärast pärimistunnistust teha eraldi toimingud. Mitme pärija korral võib vaja olla pärandvara jagamise kokkulepet.']);
+    if((S.debts||[]).some(x=>!['none'].includes(x))) R.push(['warn','€','Vara kõrval tuleb arvestada kohustusi','Kui on kahtlus, et kohustusi on palju, võib pärandi inventuur piirata pärija vastutust pärandvara väärtusega.']);
+    if(S.regime==='accrual') R.push(['warn','◐','Juurdekasvu tasaarvestus vajab arvutust','Selle varasuhte puhul ei tohiks tööriist näidata pärandvara väärtust enne tasaarvestusnõude hindamist.']);
+    if(S.regime==='unknown') R.push(['warn','◐','Varasuhe tuleb kontrollida','Abikaasa puhul saab varasuhteregistri puuduvate andmete korral olla oluline varaühisuse eeldus; registreeritud elukaaslase varasuhe on registrisse kantud.']);
+    if((S.assets||[]).includes('foreign')) R.push(['red','🌍','Välisriigi vara võib tuua teise riigi reeglid','Rahvusvaheline pärimine vajab eraldi kontrolli; prototüüp ei tohiks anda siin lõplikku järeldust.']);
+    if(!calc.exact) R.push(['info','≈','Kõiki osi ei saa veel täpselt nimetada',calc.note||'Selle perekonnaharu jaoks on vaja lisaküsimusi.']);
+    if(!R.length) R.push(['good','✓','Esialgne seadusjärgne olukord on sirgjooneline','Järgmine küsimus on lihtsalt see, kas see tulemus vastab sinu enda soovile.']);
+    return R.slice(0,6);
+  }
+
+  function showResult(){
+    app.classList.remove('active');landing.style.display='none';result.classList.add('active');window.scrollTo(0,0);
+    const calc=sharesCalculation();
+    const [lvl,txt]=confidence(calc);
+    const conf=document.getElementById('confidence');conf.className=`confidence conf-${lvl}`;conf.textContent=txt;
+    document.getElementById('resultIntro').textContent=(S.will==='none'?'See on sinu vastuste põhjal hinnatud seadusjärgne jaotus.':'Kuna sul võib olla testament või pärimisleping, näitame siin seadusjärgset jaotust võrdluseks.')+(calc.note?` ${calc.note}`:'');
+    document.getElementById('estateText').textContent=estateExplanation();
+    document.getElementById('shares').innerHTML=calc.heirs.map(h=>{
+      const pct=Math.round(h.share*10000)/100;
+      return `<div class="share-row"><div><b>${h.name}</b></div><div class="bar"><div class="fill" style="width:${Math.max(2,pct)}%"></div></div><div class="share-pct">${pct}%</div></div>`;
+    }).join('');
+    document.getElementById('risks').innerHTML=riskList(calc).map(r=>`<div class="risk ${r[0]}"><div class="ri">${r[1]}</div><div><b>${r[2]}</b><p>${r[3]}</p></div></div>`).join('');
+    document.getElementById('wishResponse').style.display='none';
+  }
+
+  function reset(){
+    Object.keys(S).forEach(k=>delete S[k]);history.length=0;current=null;selection=null;
+  }
+
+  function loadExample(){
+    reset();
+    Object.assign(S,{
+      will:'none',relationship:'married',regime:'community',previousUnion:'no',
+      livingChildren:'yes',livingCount:'3',deceasedChildren:'no',minors:'no',
+      previousRelationshipChildren:'yes',
+      assets:['home','investments','pillar2'],realEstateOrigin:'during',
+      debts:['mortgage']
+    });
+    showResult();
+  }
+
+  document.getElementById('start').addEventListener('click',()=>{reset();showApp();render('will')});
+  document.getElementById('example').addEventListener('click',loadExample);
+  document.getElementById('restart').addEventListener('click',()=>{reset();showLanding()});
+  next.addEventListener('click',goNext);
+  back.addEventListener('click',goBack);
+
+  document.querySelectorAll('.wishBtn').forEach(b=>b.addEventListener('click',()=>{
+    const box=document.getElementById('wishResponse'),v=b.dataset.wish;
+    if(v==='yes') box.innerHTML='<b>Siis ei ole eesmärk sind testamenti tegema suruda.</b><br>Võid lõpetada siin või kontrollida notariga ainult need kohad, mille juures nägid hoiatust.';
+    if(v==='no') box.innerHTML='<b>Siin tekib pärandiplaneerimise väärtus.</b><br>Järgmine tooteharu peaks küsima, mida tahaksid teisiti — näiteks kaitsta partneri kodu, jätta konkreetne vara ühele inimesele või vähendada kaasomandi riski — ja alles siis pakkuma sobivat lahendust (nt testament või notari nõuanne).';
+    if(v==='unsure') box.innerHTML='<b>Siis tasub minna ühe sammu sügavamale.</b><br>Vaata üle peamine kodu, varasuhe, pensionivara, kohustused ja võimalikud alaealised pärijad. Mõte pole teha rohkem küsimusi, vaid leida need 1–2 asja, mis võivad päriselt üllatada.';
+    box.style.display='block';
+  }));
+})();
+</script>
+</body>
+</html>
